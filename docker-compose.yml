@@ -1,0 +1,29 @@
+# Ollama — self-hosted LLM & embeddings API (OpenAI-compatible at /v1)
+# Quick start:
+#   cp .env.example .env
+#   docker compose up -d
+#   docker compose exec ollama ollama pull llama3.2:1b
+#   curl http://localhost:11434/api/generate -d '{"model":"llama3.2:1b","prompt":"hi","stream":false}'
+#
+# ⚠ Ollama has NO built-in authentication. Anything that can reach port 11434
+#   can run inference at your expense. The port binding below is deliberately
+#   restricted to loopback — remove the 127.0.0.1 prefix only if you have put
+#   an authenticating proxy in front of it.
+
+name: ollama
+
+services:
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${OLLAMA_PORT:-11434}:11434"
+    env_file: .env
+    volumes:
+      # Model weights are large — this cache is what stops every restart
+      # re-downloading gigabytes.
+      - ollama:/root/.ollama
+
+volumes:
+  ollama:
